@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NaMédia ⚡ Eletrotécnica</title>
+    <link rel="icon" href="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/26a1.png">
+    
+    <style>
+        :root { --azul: #001f3f; --verde: #2d5a27; --bg: #f0f2f5; --branco: #ffffff; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; margin: 0; }
+        .container { max-width: 480px; width: 100%; background: var(--branco); border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); overflow: hidden; border-top: 8px solid var(--azul); }
+        header { background: var(--azul); color: white; text-align: center; padding: 20px; }
+        nav { display: flex; background: #eee; padding: 5px; gap: 5px; }
+        nav button { flex: 1; border: none; padding: 10px; cursor: pointer; border-radius: 8px; font-weight: bold; background: none; color: #555; font-size: 0.75rem; transition: 0.3s; }
+        nav button.active { background: #fff; color: var(--azul); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .aba-conteudo { display: none; padding: 20px; animation: slideUp 0.3s ease; }
+        .active-content { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .bloco { border: 1px solid #ddd; padding: 15px; border-radius: 12px; margin-bottom: 15px; background: #fafafa; }
+        .controles { display: flex; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; }
+        .inputs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        input, select { padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 0.9rem; width: 100%; box-sizing: border-box; }
+        button.principal { width: 100%; background: var(--verde); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        button.limpar { width: 100%; background: #666; color: white; border: none; border-radius: 10px; cursor: pointer; padding: 10px; margin-top: 5px; }
+        #resultado, #res-p { margin-top: 20px; padding: 20px; border-radius: 12px; text-align: center; display: none; }
+        .res-aprovado { background: #d4edda; color: #155724; border: 2px solid #c3e6cb; display: block !important; }
+        .res-af { background: #fff3cd; color: #856404; border: 2px solid #ffeeba; display: block !important; }
+        .res-reprovado { background: #f8d7da; color: #721c24; border: 2px solid #f5c6cb; display: block !important; }
+        footer { text-align: center; padding: 15px; font-size: 0.8rem; color: #888; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header><h1>NaMédia ⚡</h1><p>Eletrotécnica - IFCE Fortaleza</p></header>
+    <nav>
+        <button onclick="abrir('calc')" class="active" id="btn-calc">Calculadora</button>
+        <button onclick="abrir('prev')" id="btn-prev">Quanto Falta?</button>
+        <button onclick="abrir('cre')" id="btn-cre">Créditos</button>
+    </nav>
+
+    <section id="calc" class="aba-conteudo active-content">
+        <div class="bloco">
+            <h3>N1 (Peso 3)</h3>
+            <div class="controles">
+                <select id="modoN1" onchange="ajustarCalculadora('N1')"><option value="media">Média Aritmética</option><option value="soma">Soma Direta</option></select>
+                <select id="qtdN1" onchange="ajustarCalculadora('N1')"><option value="2">2 Notas</option><option value="3">3 Notas</option><option value="4">4 Notas</option><option value="5">5 Notas</option></select>
+            </div>
+            <div id="contN1" class="inputs"></div>
+        </div>
+        <div class="bloco">
+            <h3>N2 (Peso 2)</h3>
+            <div class="controles">
+                <select id="modoN2" onchange="ajustarCalculadora('N2')"><option value="media">Média Aritmética</option><option value="soma">Soma Direta</option></select>
+                <select id="qtdN2" onchange="ajustarCalculadora('N2')"><option value="2">2 Notas</option><option value="3">3 Notas</option><option value="4">4 Notas</option><option value="5">5 Notas</option></select>
+            </div>
+            <div id="contN2" class="inputs"></div>
+        </div>
+        <button class="principal" onclick="calcular()">CALCULAR SITUAÇÃO</button>
+        <button class="limpar" onclick="limpar()">LIMPAR TUDO</button>
+        
+        <div id="resultado">
+            <h2 id="res-t"></h2>
+            <p id="res-m"></p>
+            <p id="res-af" style="font-weight:bold"></p>
+        </div>
+    </section>
+
+    <section id="prev" class="aba-conteudo">
+        <div class="bloco">
+            <h3>Quanto falta na última prova?</h3>
+            <label>Sua nota da N1:</label>
+            <input type="number" id="p-n1" placeholder="Ex: 7.0" style="margin-bottom:10px">
+            <label>Quantidade total de provas da N2:</label>
+            <select id="p-qtd" onchange="ajustarPrevisao()" style="margin-bottom:10px">
+                <option value="2">2 Notas</option><option value="3">3 Notas</option><option value="4">4 Notas</option><option value="5">5 Notas</option>
+            </select>
+            <div id="p-notas-feitas" class="inputs"></div>
+        </div>
+        <button class="principal" onclick="calcularFalta()">VER NOTA NECESSÁRIA</button>
+        <div id="res-p"></div>
+    </section>
+
+    <section id="cre" class="aba-conteudo">
+        <h3 style="text-align:center">Samuel Heber</h3>
+        <p style="text-align:center">3º Período - Eletrotécnica<br>IFCE Fortaleza</p>
+        <p style="text-align:center; font-size: 0.8rem; color:#888;">"Facilitando a vida da Eletro!"</p>
+    </section>
+    <footer>NaMédia ⚡ 2024</footer>
+</div>
+
+<script>
+    function abrir(id) {
+        document.querySelectorAll('.aba-conteudo').forEach(a => a.classList.remove('active-content'));
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active-content');
+        document.getElementById('btn-' + id).classList.add('active');
+    }
+
+    function ajustarCalculadora(etapa) {
+        const qtd = document.getElementById('qtd' + etapa).value;
+        const cont = document.getElementById('cont' + etapa);
+        cont.innerHTML = '';
+        for(let i=1; i<=qtd; i++) cont.innerHTML += `<input type="number" step="0.1" class="in-${etapa.toLowerCase()}" placeholder="P${i}">`;
+    }
+
+    function ajustarPrevisao() {
+        const qtdTotal = parseInt(document.getElementById('p-qtd').value);
+        const cont = document.getElementById('p-notas-feitas');
+        cont.innerHTML = '';
+        for(let i=1; i < qtdTotal; i++) cont.innerHTML += `<input type="number" step="0.1" class="in-prev" placeholder="P${i}">`;
+    }
+
+    function calcular() {
+        const pegar = (etapa) => {
+            let modo = document.getElementById('modo' + etapa).value;
+            let inputs = document.querySelectorAll('.in-' + etapa.toLowerCase());
+            let notas = Array.from(inputs).map(i => parseFloat(i.value) || 0);
+            let soma = notas.reduce((a, b) => a + b, 0);
+            return modo === "media" ? soma / (notas.length || 1) : soma;
+        };
+        let n1 = pegar('N1'); let n2 = pegar('N2');
+        let m = ((n1 * 3) + (n2 * 2)) / 5;
+        const res = document.getElementById('resultado');
+        res.style.display = 'block'; res.className = (m >= 6 ? 'res-aprovado' : m >= 3 ? 'res-af' : 'res-reprovado');
+        
+        document.getElementById('res-t').innerText = m >= 6 ? "APROVADO! 🎉" : m >= 3 ? "AVALIAÇÃO FINAL ✍️" : "REPROVADO ❌";
+        document.getElementById('res-m').innerText = "Média Final: " + m.toFixed(2);
+        document.getElementById('res-af').innerText = (m < 6 && m >= 3) ? "Precisa de " + (10 - m).toFixed(2) + " na AF." : "";
+    }
+
+    function calcularFalta() {
+        let n1 = parseFloat(document.getElementById('p-n1').value) || 0;
+        let qtdT = parseInt(document.getElementById('p-qtd').value);
+        let notasF = Array.from(document.querySelectorAll('.in-prev')).map(i => parseFloat(i.value) || 0);
+        let somaF = notasF.reduce((a,b) => a+b, 0);
+        let n2Nec = (30 - (n1 * 3)) / 2;
+        let pUltima = (n2Nec * qtdT) - somaF;
+
+        const resP = document.getElementById('res-p');
+        resP.style.display = 'block';
+        
+        if (pUltima <= 0) {
+            resP.className = 'res-aprovado';
+            resP.innerHTML = "<strong>JÁ PASSOU!</strong><br>Suas notas atuais já garantem a média 6.0.";
+        } else {
+            resP.className = pUltima > 10 ? 'res-reprovado' : 'res-af';
+            resP.innerHTML = pUltima > 10 ? `Preciso de ${pUltima.toFixed(2)} (Foco na AF!)` : `Precisa de <strong>${pUltima.toFixed(2)}</strong> na última prova.`;
+        }
+    }
+
+    function limpar() {
+        document.querySelectorAll('input').forEach(i => i.value = '');
+        document.getElementById('resultado').style.display = 'none';
+        document.getElementById('res-p').style.display = 'none';
+    }
+
+    ajustarCalculadora('N1'); ajustarCalculadora('N2'); ajustarPrevisao();
+</script>
+</body>
+</html>
